@@ -51,7 +51,6 @@ const error = ref("");
 const fecha = new Date().getFullYear();
 const apiUrl = "http://192.168.1.61:8000";
 const apiProdUrl = "";
-const permissions = [];
 const router = useRouter();
 
 // Función de inicio de sesión

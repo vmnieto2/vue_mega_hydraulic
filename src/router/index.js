@@ -5,6 +5,9 @@ import CreateReportView from '@/views/CreateReportView.vue';
 import ListReportView from '@/views/ListReportView.vue';
 import EditProfileView from '@/views/EditProfileView.vue';
 import EditReportView from '@/views/EditReportView.vue';
+import CreateUserView from '@/views/CreateUserView.vue';
+import ListUserView from '@/views/ListUserView.vue';
+import ChangePasswordView from '@/views/ChangePasswordView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,12 +16,11 @@ const router = createRouter({
     {path: '/dashboard', name: 'dashboard', component: DashboardView},
     {path: '/report/create', name: 'report/create', component: CreateReportView},
     {path: '/reports', name: 'reports', component: ListReportView},
-    {path: '/profile/edit/:id', name: 'profile/edit/', component: EditProfileView}, //, props: true},
-    {path: '/report/edit/:id', name: 'report/edit/', component: EditReportView}, //, props: true},
-    // {path: '/payment/:id', name: 'payment', component: PaymentView, props: true},
-    // {path: '/loan/:id', name: 'loan', component: LoanView, props: true},
-    // {path: '/params', name: 'params', component: ParamsView, props: true},
-    // {path: '/params/:type', name: 'paramsDetails', component: ParamsDetailsView, props: true},
+    {path: '/profile/edit/:id', name: 'profile/edit/', component: EditProfileView},
+    {path: '/report/edit/:id', name: 'report/edit/', component: EditReportView},
+    {path: '/user/create', name: 'user/create', component: CreateUserView},
+    {path: '/users', name: 'users', component: ListUserView},
+    {path: '/profile/change_password/:id', name: 'profile/change_password/', component: ChangePasswordView},
   ]
 })
 

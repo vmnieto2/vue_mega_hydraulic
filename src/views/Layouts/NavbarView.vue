@@ -8,8 +8,8 @@
 
     <nav>
       <router-link :to="`/dashboard`">Menú Principal</router-link>
-      <router-link :to="{ name: 'profile/edit/', params: { id: usuario } }">Configuración</router-link>
-      
+      <router-link :to="{ name: 'profile/edit/', params: { id: usuario } }">Editar Perfil</router-link>
+      <router-link :to="{ name: 'profile/change_password/', params: { id: usuario } }">Cambiar Contraseña</router-link>
       <a href="#" @click="logout">Salir</a>
     </nav>
 
@@ -50,7 +50,7 @@ onMounted(() => {
   // Asignar valores desde localStorage
   primer_nombre.value = first_name || '';
   primer_apellido.value = last_name || '';
-  foto.value = `${apiUrl}${photo}`;
+  foto.value = `${apiUrl}/${photo}`;
 });
 </script>
 

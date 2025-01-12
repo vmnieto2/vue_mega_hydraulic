@@ -1,11 +1,17 @@
 <template>
     <LayoutView>
-      <form @submit.prevent="actualizarPerfil">
-            <h2>Editar Perfil</h2>
+      <form @submit.prevent="crearUsuario">
+            <h2>Crear Usuario</h2>
 
             <div class="form-group">
+                <label for="select_tipo_documento">Tipo Documento:</label>
+                <select id="select_tipo_documento" v-model="tipo_documento" required>
+                    <option v-for="tipo_doc in tipo_documento_list" :key="tipo_doc.id" :value="tipo_doc.id">{{ tipo_doc.description }}</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="documento">Documento:</label>
-                <input type="text" id="documento" v-model="documento" readonly>
+                <input type="text" id="documento" v-model="documento">
             </div>
             <div class="form-group">
                 <label for="primer_nombre">Primer Nombre:</label>
@@ -28,15 +34,13 @@
                 <input type="email" id="correo" v-model="correo">
             </div>
             <div class="form-group">
-                <label for="foto">Foto:</label>
-                <input
-                    type="file"
-                    class="form-control"
-                    @change="handleFileUpload"
-                />
+                <label for="select_tipo_usuario">Tipo Usuario:</label>
+                <select id="select_tipo_usuario" v-model="tipo_usuario" required>
+                    <option v-for="tipo_us in tipo_usuario_list" :key="tipo_us.id" :value="tipo_us.id">{{ tipo_us.name }}</option>
+                </select>
             </div>
 
-            <button type="submit">Actualizar</button>
+            <button type="submit">Crear</button>
             <div v-if="error" class="alert alert-danger mt-3" >
                 {{ error }}
             </div>
@@ -51,17 +55,21 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        {{ msg }}
+                        <p>{{ msg }}</p>
+                        <p>Su nueva contraseña es: ({{ clave }})
+                            recuerde cambiarla una vez ingrese.
+                        </p>
+                        
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="refresh">Cerrar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
         </div>
 
-         <!-- Modal de error -->
-         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true" data-bs-backdrop="static" ref="errorModal">
+        <!-- Modal de error -->
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true" data-bs-backdrop="static" ref="errorModal">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -90,15 +98,16 @@ import { Modal } from 'bootstrap';
 
 const tipo_documento = ref(0);
 const tipo_documento_list = ref([]);
+const tipo_usuario = ref(0);
+const tipo_usuario_list = ref([]);
 const documento = ref('');
 const primer_nombre = ref('');
 const segundo_nombre = ref('');
 const primer_apellido = ref('');
 const segundo_apellido = ref('');
 const correo = ref('');
-const foto = ref(null);
+const clave = ref('');
 const token = localStorage.getItem('token');
-const user_id = localStorage.getItem('user_id');
 const modalInstance = ref(null);
 const modalErrorInstance = ref(null);
 const msg = ref('');
@@ -108,7 +117,7 @@ const apiUrl = 'http://192.168.1.61:8000';
 const apiProdUrl = ref('');
 
 
-const actualizarPerfil = async () => {
+const crearUsuario = async () => {
     try {
         if (!token) {
             router.push('/'); // Redirigir al login si no hay token
@@ -116,16 +125,16 @@ const actualizarPerfil = async () => {
 
         const response = await axios.post(
             // `${this.apiProdUrl}/client/save_client`,
-            `${apiUrl}/user/update_user`,
+            `${apiUrl}/user/create_user`,
             {
-                user_id: user_id,
+                type_document: tipo_documento.value,
                 document: documento.value,
                 first_name: primer_nombre.value,
                 second_name: segundo_nombre.value,
                 last_name: primer_apellido.value,
                 second_last_name: segundo_apellido.value,
                 email: correo.value,
-                photo: foto.value
+                user_type_id: tipo_usuario.value
             },
             {
                 headers: {
@@ -136,12 +145,10 @@ const actualizarPerfil = async () => {
         );
         if (response.status === 201) {
             msg.value = response.data.message
-            if (foto.value != null) {
-                localStorage.setItem("photo", response.data.data);
-            }
+            clave.value = response.data.data
             modalInstance.value.show();                    
         }else if (response.status === 200) {
-            error.value = response.data.message
+            msg.value = response.data.message
         }
     } catch (error) {
         modalErrorInstance.value.show()
@@ -169,12 +176,9 @@ const cargarDatos = async () => {
             tipo_documento_list.value = response.data.data;
         }
 
-        const responseUser = await axios.post(
+        const responseTipoUsuario = await axios.post(
             // `${this.apiProdUrl}/params/get_clients`, {},
-            `${apiUrl}/user/get_user`, 
-            {
-                user_id: parseInt(user_id)
-            },
+            `${apiUrl}/params/get_type_user`, {},
             {
                 headers: {
                     Accept: "application/json",
@@ -183,15 +187,9 @@ const cargarDatos = async () => {
             }
         );
 
-        if (responseUser.status === 200) {
-            msg.value = responseUser.data.message;
-            tipo_documento.value = responseUser.data.data.type_document;
-            documento.value = responseUser.data.data.document;
-            primer_nombre.value = responseUser.data.data.first_name;
-            segundo_nombre.value = responseUser.data.data.second_name;
-            primer_apellido.value = responseUser.data.data.last_name;
-            segundo_apellido.value = responseUser.data.data.second_last_name;
-            correo.value = responseUser.data.data.email;
+        if (responseTipoUsuario.status === 200) {
+            msg.value = responseTipoUsuario.data.message;
+            tipo_usuario_list.value = responseTipoUsuario.data.data;
         }
     } catch (error) {
         console.error('Error al cargar los datos:', error);
@@ -199,24 +197,6 @@ const cargarDatos = async () => {
         errorMsg.value = error.response.data.message;
     }
 };
-const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-        console.error("No se seleccionó un archivo.");
-        return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-        foto.value = reader.result; // Aquí almacenamos el archivo en base64
-    };
-    reader.onerror = (error) => {
-        console.error("Error al leer el archivo:", error);
-    };
-    reader.readAsDataURL(file);
-};
-const refresh = async () => {
-    location.reload();
-}
 
 // Código que se ejecuta al montar el componente
 onMounted(() => {
