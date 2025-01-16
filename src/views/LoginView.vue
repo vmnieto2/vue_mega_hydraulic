@@ -39,6 +39,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
@@ -49,7 +50,6 @@ const document = ref("");
 const password = ref("");
 const error = ref("");
 const fecha = new Date().getFullYear();
-const apiUrl = "http://192.168.1.61:8000";
 const apiProdUrl = "";
 const router = useRouter();
 
@@ -57,7 +57,6 @@ const router = useRouter();
 const login = async () => {
   try {
     const response = await axios.post(
-      // `${apiProdUrl}/login`,
       `${apiUrl}/login`,
       {
         document: document.value.toString(),

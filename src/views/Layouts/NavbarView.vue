@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../../config.js";
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -25,7 +26,6 @@ const primer_nombre = ref('');
 const primer_apellido = ref('');
 const foto = ref('');
 const usuario = localStorage.getItem('user_id').toString();
-const apiUrl = 'http://192.168.1.61:8000';
 
 // Acceder al enrutador
 const router = useRouter();

@@ -81,6 +81,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import LayoutView from '../views/Layouts/LayoutView.vue';
@@ -104,8 +105,6 @@ const modalErrorInstance = ref(null);
 const msg = ref('');
 const error = ref('');
 const errorMsg = ref('');
-const apiUrl = 'http://192.168.1.61:8000';
-const apiProdUrl = ref('');
 
 
 const actualizarPerfil = async () => {
@@ -115,7 +114,6 @@ const actualizarPerfil = async () => {
         }
 
         const response = await axios.post(
-            // `${this.apiProdUrl}/client/save_client`,
             `${apiUrl}/user/update_user`,
             {
                 user_id: user_id,
@@ -154,7 +152,6 @@ const cargarDatos = async () => {
             router.push('/'); // Redirigir al login si no hay token
         }
         const response = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/params/get_type_document`, {},
             {
                 headers: {
@@ -170,7 +167,6 @@ const cargarDatos = async () => {
         }
 
         const responseUser = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/user/get_user`, 
             {
                 user_id: parseInt(user_id)

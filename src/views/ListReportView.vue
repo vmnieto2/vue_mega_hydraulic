@@ -81,6 +81,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
@@ -91,8 +92,6 @@ import pdf from "@/assets/icons/pdf.png";
 const user_id = parseInt(localStorage.getItem('user_id'));
 const user_type_id = localStorage.getItem('user_type_id');
 const token = localStorage.getItem('token');
-const apiUrl = 'http://192.168.1.61:8000';
-const apiProdUrl = ref('');
 const msg = ref('');
 
 const report_list = ref([]);
@@ -110,7 +109,6 @@ const get_reports = async () => {
   try {
         state.value = user_type_id == 1 ? true : false;
         const response = await axios.post(
-            // `${apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/reports/list_report`, 
             {
                 limit: parseInt(limit.value),
@@ -147,7 +145,6 @@ const generar_pdf = async (report_id) => {
             router.push('/'); // Redirigir al login si no hay token
         }
         const response = await axios.post(
-            // `${this.apiProdUrl}/client/save_client`,
             `${apiUrl}/reports/generate_report`,
             {
                 report_id: report_id,

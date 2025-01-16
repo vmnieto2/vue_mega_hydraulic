@@ -97,6 +97,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { ref, onMounted } from 'vue';
 import LayoutView from '../views/Layouts/LayoutView.vue';
 import axios from 'axios';
@@ -119,8 +120,6 @@ const modalErrorInstance = ref(null);
 const msg = ref('');
 const error = ref('');
 const errorMsg = ref('');
-const apiUrl = 'http://192.168.1.61:8000';
-const apiProdUrl = ref('');
 
 const router = useRouter();
 
@@ -142,7 +141,6 @@ const cambiarPassword = async () => {
             router.push('/'); // Redirigir al login si no hay token
         }
         const response = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/user/change_password`, 
             {
                 user_id: user_id,

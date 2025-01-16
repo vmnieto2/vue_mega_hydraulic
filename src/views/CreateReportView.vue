@@ -162,6 +162,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -193,8 +194,6 @@ const modalInstance = ref(null);
 const report_id = ref('');
 const msg = ref('');
 const error = ref('');
-const apiUrl = 'http://192.168.1.61:8000';
-const apiProdUrl = ref('');
 
 // Acceder al enrutador
 const router = useRouter();
@@ -217,7 +216,6 @@ const createReport = async () => {
         }));
 
         const response = await axios.post(
-            // `${this.apiProdUrl}/client/save_client`,
             `${apiUrl}/reports/create_report`,
             {
                 activity_date: fecha_actividad_formateada.value,
@@ -258,7 +256,6 @@ const generar_pdf = async () => {
             router.push('/'); // Redirigir al login si no hay token
         }
         const response = await axios.post(
-            // `${this.apiProdUrl}/client/save_client`,
             `${apiUrl}/reports/generate_report`,
             {
                 report_id: report_id.value,
@@ -291,7 +288,6 @@ const generar_pdf = async () => {
 const cargarDatos = async () => {
     try {
         const response = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/params/get_clients`, {},
             {
                 headers: {
@@ -307,7 +303,6 @@ const cargarDatos = async () => {
         }
 
         const responseServices = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/params/get_type_service`, {},
             {
                 headers: {
@@ -322,7 +317,6 @@ const cargarDatos = async () => {
         }
 
         const responseEquipments = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/params/get_type_equipments`, {},
             {
                 headers: {

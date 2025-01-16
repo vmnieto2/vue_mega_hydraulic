@@ -18,13 +18,13 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { useRouter } from "vue-router";
 import LayoutView from '../views/Layouts/LayoutView.vue';
 
 // const user_id = localStorage.getItem('user_id');
 const token = localStorage.getItem('token');
 const modulos = JSON.parse(localStorage.getItem('permissions'));
-const apiUrl = 'http://192.168.1.61:8000';
 
 // Accede al enrutador
 const router = useRouter();

@@ -89,6 +89,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import LayoutView from '../views/Layouts/LayoutView.vue';
@@ -113,8 +114,6 @@ const modalErrorInstance = ref(null);
 const msg = ref('');
 const error = ref('');
 const errorMsg = ref('');
-const apiUrl = 'http://192.168.1.61:8000';
-const apiProdUrl = ref('');
 
 
 const crearUsuario = async () => {
@@ -124,7 +123,6 @@ const crearUsuario = async () => {
         }
 
         const response = await axios.post(
-            // `${this.apiProdUrl}/client/save_client`,
             `${apiUrl}/user/create_user`,
             {
                 type_document: tipo_documento.value,
@@ -161,7 +159,6 @@ const cargarDatos = async () => {
             router.push('/'); // Redirigir al login si no hay token
         }
         const response = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/params/get_type_document`, {},
             {
                 headers: {
@@ -177,7 +174,6 @@ const cargarDatos = async () => {
         }
 
         const responseTipoUsuario = await axios.post(
-            // `${this.apiProdUrl}/params/get_clients`, {},
             `${apiUrl}/params/get_type_user`, {},
             {
                 headers: {

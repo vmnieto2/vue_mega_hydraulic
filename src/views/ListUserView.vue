@@ -162,6 +162,7 @@
 </template>
 
 <script setup>
+import apiUrl from "../../config.js";
 import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
@@ -172,8 +173,6 @@ import desactivar from "@/assets/icons/desactivar.png";
 import activar from "@/assets/icons/activar.png";
 
 const token = localStorage.getItem('token');
-const apiUrl = 'http://192.168.1.61:8000';
-const apiProdUrl = ref('');
 const msg = ref('');
 
 const tipo_usuario = ref(0);
@@ -202,7 +201,6 @@ const router = useRouter();
 const get_users = async () => {
   try {
     const response = await axios.post(
-        // `${apiProdUrl}/params/get_clients`, {},
         `${apiUrl}/user/list_user`, 
         {
             limit: parseInt(limit.value),
@@ -225,7 +223,6 @@ const get_users = async () => {
     }
 
     const responseTipoUsuario = await axios.post(
-        // `${this.apiProdUrl}/params/get_clients`, {},
         `${apiUrl}/params/get_type_user`, {},
         {
             headers: {
@@ -260,7 +257,6 @@ const cambiarEstado = async () => {
   try {
     estado_enviar.value = estado.value == 1 ? 0 : 1;
     const response = await axios.post(
-        // `${apiProdUrl}/params/get_clients`, {},
         `${apiUrl}/user/change_status`, 
         {
             user_id: parseInt(usuario_id.value),
@@ -287,7 +283,6 @@ const cambiarEstado = async () => {
 const gestionUsuario = async () => {
   try {
     const response = await axios.post(
-        // `${apiProdUrl}/params/get_clients`, {},
         `${apiUrl}/user/update_type_user`, 
         {
             user_id: usuario_id.value,
