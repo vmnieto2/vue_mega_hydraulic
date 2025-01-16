@@ -25,7 +25,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="txt_om">OM:</label>
+                <label for="txt_om">OM/SOLPED:</label>
                 <input type="text" id="txt_om" v-model="om">
             </div>
 
