@@ -3,7 +3,7 @@
       <div class="card-container">
         <div class="card" v-for="(modulo, index) in modulos" :key="index">
           <div class="card-header">
-            <img :src="`src/assets/icons/${modulo.icon}`" :alt=modulo.icon>
+            <img :src="`/${modulo.icon}`" :alt=modulo.icon>
             <h5 class="card-title">{{modulo.name}}</h5>
           </div>
           <div class="card-body">
@@ -18,7 +18,6 @@
 </template>
 
 <script setup>
-import apiUrl from "../../config.js";
 import { useRouter } from "vue-router";
 import LayoutView from '../views/Layouts/LayoutView.vue';
 
