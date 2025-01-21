@@ -8,6 +8,8 @@ import EditReportView from '@/views/EditReportView.vue';
 import CreateUserView from '@/views/CreateUserView.vue';
 import ListUserView from '@/views/ListUserView.vue';
 import ChangePasswordView from '@/views/ChangePasswordView.vue';
+import CreateClientView from '@/views/CreateClientView.vue';
+import ListClientView from '@/views/ListClientView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +23,8 @@ const router = createRouter({
     {path: '/user/create', name: 'user/create', component: CreateUserView},
     {path: '/users', name: 'users', component: ListUserView},
     {path: '/profile/change_password/:id', name: 'profile/change_password/', component: ChangePasswordView},
+    {path: '/client/create', name: 'client/create', component: CreateClientView},
+    {path: '/clients', name: 'clients', component: ListClientView},
   ]
 })
 

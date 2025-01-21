@@ -1,35 +1,29 @@
 <template>
     <LayoutView>
-      <h1>Listado Usuarios</h1>
-      <div class="container-list" v-if="usuarios_list">
-        <table class="table table-striped table-hover" v-if="usuarios_list">
+      <h1>Listado de Clientes</h1>
+      <div class="container-list" v-if="clientes_list">
+        <table class="table table-striped table-hover" v-if="clientes_list">
           <thead>
               <tr>
                   <th>Id</th>
-                  <th>Documento</th>
                   <th>Nombre</th>
-                  <th>Correo</th>
-                  <th>Tipo Usuario</th>
                   <th>Estado</th>
                   <th>Acciones</th>
               </tr>
           </thead>
           <tbody>
-              <tr v-for="usuario in usuarios_list" :key="usuario.id">
-                <td>{{ usuario.id }}</td>
-                <td>{{ usuario.document }}</td>
-                <td>{{ usuario.user_name }}</td>
-                <td>{{ usuario.email }}</td>
-                <td>{{ usuario.user_type }}</td>
-                <td v-if="usuario.status == 1">ACTIVADO</td>
+              <tr v-for="cliente in clientes_list" :key="cliente.id">
+                <td>{{ cliente.id }}</td>
+                <td>{{ cliente.name }}</td>
+                <td v-if="cliente.status == 1">ACTIVADO</td>
                 <td v-else>DESACTIVADO</td>
                 <td class="th-icons">
-                  <img :src="gestion" alt="gestion icon" @click="modalEdit(usuario)">
-                  <td v-if="usuario.status == 1">
-                    <img :src="desactivar" alt="desactivar icon" @click="modalConfirm(usuario)">
+                  <img :src="gestion" alt="gestion icon" @click="modalEdit(cliente)">
+                  <td v-if="cliente.status == 1">
+                    <img :src="desactivar" alt="desactivar icon" @click="modalConfirm(cliente)">
                   </td>
                   <td class="td-desactivado" v-else>
-                    <img :src="activar" alt="activar icon" @click="modalConfirm(usuario)">
+                    <img :src="activar" alt="activar icon" @click="modalConfirm(cliente)">
                   </td>
                 </td>
               </tr>
@@ -105,10 +99,10 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                  {{ pregunta }} {{ usuario_id }}?
+                  {{ pregunta }} {{ cliente_id }}?
               </div>
               <div class="modal-footer">
-                  <button type="button" class="btn btn-success" @click="cambiarEstado">Yes</button>
+                  <button type="button" class="btn btn-success" @click="gestionCliente({client_id: cliente_id, status: estado == 1 ? 0 : 1})">Yes</button>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               </div>
               </div>
@@ -144,15 +138,13 @@
                 <div class="modal-body">
                     <form>
                       <div class="form-group">
-                          <label for="select_tipo_usuario">Tipo Usuario:</label>
-                          <select id="select_tipo_usuario" v-model="tipo_usuario" required>
-                              <option v-for="tipo_us in tipo_usuario_list" :key="tipo_us.id" :value="tipo_us.id">{{ tipo_us.name }}</option>
-                          </select>
+                          <label for="nombre_cliente">Nombre Cliente:</label>
+                          <input type="text" id="nombre_cliente" v-model="cliente_name">
                       </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" @click="gestionUsuario">Actualizar</button>
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" @click="gestionCliente({client_id: cliente_id, client_name: cliente_name})">Actualizar</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
               </div>
@@ -175,14 +167,12 @@ import activar from "@/assets/icons/activar.png";
 const token = localStorage.getItem('token');
 const msg = ref('');
 
-const tipo_usuario = ref(0);
-const tipo_usuario_list = ref([]);
-const usuarios_list = ref([]);
+const clientes_list = ref([]);
+const cliente_name = ref('');
+const cliente_id = ref('');
 const total_paginas = ref(0);
 const total_registros = ref(0);
-const usuario_id = ref('');
 const estado = ref(0);
-const estado_enviar = ref(0);
 
 const limit = ref(10);
 const position = ref(1);
@@ -198,10 +188,10 @@ const modalInstanceEditar   = ref(null);
 
 const router = useRouter();
 
-const get_users = async () => {
+const get_clients = async () => {
   try {
     const response = await axios.post(
-        `${apiUrl}/user/list_user`, 
+        `${apiUrl}/client/list_client`, 
         {
             limit: parseInt(limit.value),
             position: position.value
@@ -216,78 +206,35 @@ const get_users = async () => {
 
     if (response.status === 200) {
         msgList.value = response.data.message;
-        usuarios_list.value = response.data.data.usuarios;
+        clientes_list.value = response.data.data.clientes;
         total_paginas.value = response.data.data.total_pag;
         total_registros.value = response.data.data.total_registros;
         position.value = response.data.data.posicion_pag;
     }
 
-    const responseTipoUsuario = await axios.post(
-        `${apiUrl}/params/get_type_user`, {},
-        {
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`
-            }
-        }
-    );
-
-    if (responseTipoUsuario.status === 200) {
-        tipo_usuario_list.value = responseTipoUsuario.data.data;
-    }
   } catch (error) {
       console.error('Error al cargar los datos:', error);
   }
 }
 const changePage = async (newPosition) => {
   position.value = newPosition;
-  await get_users(); // Vuelve a cargar los datos con el nuevo límite y posición
+  await get_clients(); // Vuelve a cargar los datos con el nuevo límite y posición
 };
-const modalConfirm = async (data_usuario) => {
-  if (data_usuario.status == 1){
-    pregunta.value = "¿Seguro desea desactivar el usuario: "
+const modalConfirm = async (data_cliente) => {
+  if (data_cliente.status == 1){
+    pregunta.value = "¿Seguro desea desactivar el cliente: "
   }else{
-    pregunta.value = "¿Seguro desea activar el usuario: "
+    pregunta.value = "¿Seguro desea activar el cliente: "
   }
   modalInstancePregunta.value.show();
-  usuario_id.value = data_usuario.id;
-  estado.value = data_usuario.status;
+  cliente_id.value = data_cliente.id;
+  estado.value = data_cliente.status;
 };
-const cambiarEstado = async () => {
-  try {
-    estado_enviar.value = estado.value == 1 ? 0 : 1;
-    const response = await axios.post(
-        `${apiUrl}/user/change_status`, 
-        {
-            user_id: parseInt(usuario_id.value),
-            status: estado_enviar.value
-        },
-        {
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`
-            }
-        }
-    );
-    modalInstancePregunta.value.hide();
-    if (response.status === 200) {
-        msg.value = response.data.message;
-        modalInstanceExito.value.show()
-        await get_users()
-    }
-  } catch (error) {
-    modalErrorInstance.value.show()
-    errorMsg.value = error.response.data.message;
-  }
-};
-const gestionUsuario = async () => {
+const gestionCliente = async (data_update) => {
   try {
     const response = await axios.post(
-        `${apiUrl}/user/update_type_user`, 
-        {
-            user_id: usuario_id.value,
-            user_type_id: tipo_usuario.value
-        },
+        `${apiUrl}/client/update_client`, 
+        data_update,
         {
             headers: {
                 Accept: "application/json",
@@ -296,10 +243,11 @@ const gestionUsuario = async () => {
         }
     );
     modalInstanceEditar.value.hide();
+    modalInstancePregunta.value.hide();
     if (response.status === 200) {
         msg.value = response.data.message;
         modalInstanceExito.value.show();
-        await get_users();
+        await get_clients();
     }
 
   } catch (error) {
@@ -307,8 +255,8 @@ const gestionUsuario = async () => {
   }
 };
 const modalEdit = async (param) => {
-  tipo_usuario.value = param.user_type_id
-  usuario_id.value = param.id
+  cliente_name.value = param.name
+  cliente_id.value = param.id
   modalInstanceEditar.value.show();
 };
 // Código que se ejecuta al montar el componente
@@ -321,7 +269,7 @@ onMounted(() => {
         router.push('/'); // Redirigir al login si no hay token
     }
     // Cargar los datos para los select inputs cuando se monta el componente
-    get_users();
+    get_clients();
 });
 </script>
 
