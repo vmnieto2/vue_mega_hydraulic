@@ -145,14 +145,14 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exitoModalLabel">Modal Reporte</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="goListaReportes"></button>
                     </div>
                     <div class="modal-body">
                         {{ msg }}
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" data-bs-dismiss="modal" @click="generar_pdf">Generar PDF</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="goListaReportes">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -279,6 +279,7 @@ const generar_pdf = async () => {
             document.body.appendChild(link);
             link.click();  // Ejecutar el click para descargar el archivo
             document.body.removeChild(link);  // Limpiar el DOM
+            goListaReportes();
         }
     } catch (error) {
         console.error('Error al generar pdf:', error);
@@ -410,6 +411,9 @@ const handleImageChange = async (event, index) => {
         };
         reader.readAsDataURL(file);
     }
+};
+const goListaReportes = () => {
+    router.push('/reports');
 };
 // Código que se ejecuta al montar el componente
 onMounted(() => {

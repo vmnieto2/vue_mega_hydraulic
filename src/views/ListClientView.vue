@@ -1,6 +1,7 @@
 <template>
     <LayoutView>
       <h1>Listado de Clientes</h1>
+      <router-link :to="{name: 'client/addLinePerson/'}" class="button">Agregar Líneas o Persona</router-link>
       <div class="container-list" v-if="clientes_list">
         <table class="table table-striped table-hover" v-if="clientes_list">
           <thead>
@@ -18,7 +19,7 @@
                 <td v-if="cliente.status == 1">ACTIVADO</td>
                 <td v-else>DESACTIVADO</td>
                 <td class="th-icons">
-                  <img :src="gestion" alt="gestion icon" @click="modalEdit(cliente)">
+                  <router-link :to="{ name: 'client/edit/', params: { id: cliente.id } }"><img :src="gestion" alt="gestion icon"></router-link>
                   <td v-if="cliente.status == 1">
                     <img :src="desactivar" alt="desactivar icon" @click="modalConfirm(cliente)">
                   </td>
@@ -332,6 +333,17 @@ input, textarea, select {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+}
+
+.button {
+  text-decoration: none;
+  background-color: #2a475f;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 0 5px;
+  border-radius: 5px;
+  cursor: pointer; 
 }
 
 
