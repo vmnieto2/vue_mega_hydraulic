@@ -25,8 +25,23 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="txt_om">OM/SOLPED:</label>
+                <label for="txt_om">OM:</label>
                 <input type="text" id="txt_om" v-model="om">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_solped">Solped:</label>
+                <input type="text" id="txt_solped" v-model="solped">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_orden">Orden de compra:</label>
+                <input type="text" id="txt_orden" v-model="orden_compra">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_posicion">Posición:</label>
+                <input type="text" id="txt_posicion" v-model="posicion">
             </div>
 
             <hr>
@@ -59,6 +74,11 @@
             <div class="form-group">
                 <label for="txt_descripcion_servicio">Descripción del servicio:</label>
                 <textarea id="txt_descripcion_servicio" v-model="descripcion_servicio"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="txt_informacion">Información:</label>
+                <textarea id="txt_informacion" v-model="informacion"></textarea>
             </div>
 
             <div class="form-group">
@@ -185,9 +205,13 @@ const cliente = ref('');
 const linea = ref('');
 const persona = ref('');
 const om = ref('');
+const solped = ref('');
+const orden_compra = ref('');
+const posicion = ref('');
 const tipo_equipo = ref('');
 const nombre_equipo = ref('');
 const descripcion_servicio = ref('');
+const informacion = ref('');
 const user_id = localStorage.getItem('user_id');
 const token = localStorage.getItem('token');
 const modalInstance = ref(null);
@@ -223,10 +247,14 @@ const createReport = async () => {
                 client_line_id: linea.value,
                 person_receives: persona.value,
                 om: om.value,
+                solped: solped.value,
+                buy_order: orden_compra.value,
+                position: posicion.value,
                 type_service: servicios_seleccionados.value,
                 equipment_type_id: tipo_equipo.value,
                 equipment_name: nombre_equipo.value,
                 service_description: descripcion_servicio.value,
+                information: informacion.value,
                 task_list: tasks.value,
                 files: imagenes.value,
                 user_id: user_id,

@@ -29,6 +29,21 @@
                 <input type="text" id="txt_om" v-model="om">
             </div>
 
+            <div class="form-group">
+                <label for="txt_solped">Solped:</label>
+                <input type="text" id="txt_solped" v-model="solped">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_orden">Orden de compra:</label>
+                <input type="text" id="txt_orden" v-model="orden_compra">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_posicion">Posición:</label>
+                <input type="text" id="txt_posicion" v-model="posicion">
+            </div>
+
             <hr>
 
             <div class="form-group">
@@ -59,6 +74,11 @@
             <div class="form-group">
                 <label for="txt_descripcion_servicio">Descripción del servicio:</label>
                 <textarea id="txt_descripcion_servicio" v-model="descripcion_servicio"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="txt_informacion">Información:</label>
+                <textarea id="txt_informacion" v-model="informacion"></textarea>
             </div>
 
             <div class="form-group">
@@ -196,9 +216,13 @@ const cliente_seleccionado = ref(null);
 const linea_seleccionada = ref(null);
 const persona_seleccionada = ref(null);
 const om = ref('');
+const solped = ref('');
+const orden_compra = ref('');
+const posicion = ref('');
 const tipo_equipo = ref('');
 const nombre_equipo = ref('');
 const descripcion_servicio = ref('');
+const informacion = ref('');
 const user_id = localStorage.getItem('user_id');
 const token = localStorage.getItem('token');
 const modalInstance = ref(null);
@@ -235,6 +259,10 @@ const editReport = async () => {
                 client_line_id: linea_seleccionada.value,
                 person_receives: persona_seleccionada.value,
                 om: om.value,
+                solped: solped.value,
+                buy_order: orden_compra.value,
+                position: posicion.value,
+                information: informacion.value,                
                 type_service: servicios_seleccionados.value,
                 equipment_type_id: tipo_equipo.value,
                 equipment_name: nombre_equipo.value,
@@ -318,12 +346,16 @@ const cargarDatos = async () => {
             data_report.value = response_report.data.data;
             fecha_actividad.value = data_report.value.activity_date;
             om.value = data_report.value.om;
+            solped.value = data_report.value.solped;
+            orden_compra.value = data_report.value.buy_order;
+            posicion.value = data_report.value.position;
             cliente_seleccionado.value = data_report.value.client_id;
             linea_seleccionada.value = data_report.value.client_line_id;
             persona_seleccionada.value = data_report.value.person_receive_id;
             servicios_seleccionados.value = data_report.value.type_service.map((servicio)=>servicio.id);
             nombre_equipo.value = data_report.value.equipment_name;
             descripcion_servicio.value = data_report.value.service_description;
+            informacion.value = data_report.value.information;
             tipo_equipo.value = data_report.value.equipment_type_id;
             tasks_list.value = data_report.value.tasks;
             imagenes.value = data_report.value.files.map(file => ({
