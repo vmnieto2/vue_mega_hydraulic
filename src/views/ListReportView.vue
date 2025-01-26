@@ -1,6 +1,65 @@
 <template>
     <LayoutView>
       <h1>Ver Reportes</h1>
+
+      <!-- Acordeón de filtros -->
+      <div class="accordion" id="filterAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingFilters">
+            <button 
+              class="accordion-button collapsed" 
+              type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#collapseFilters" 
+              aria-expanded="false" 
+              aria-controls="collapseFilters"
+              @click="get_clients"
+            >
+              Filtros
+            </button>
+          </h2>
+          <div 
+            id="collapseFilters" 
+            class="accordion-collapse collapse" 
+            aria-labelledby="headingFilters" 
+            data-bs-parent="#filterAccordion"
+          >
+            <div class="accordion-body">
+              <div class="filter-container">
+                <div class="form-group">
+                  <label for="filterOM">OM</label>
+                  <input v-model="filters.om" type="text" id="filterOM" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="filterSolped">Solped</label>
+                  <input v-model="filters.solped" type="text" id="filterSolped" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="filterBuyOrder">Orde de Compra</label>
+                  <input v-model="filters.buy_order" type="text" id="filterBuyOrder" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="filterClient">Cliente:</label>
+                  <select class="form-control" id="filterClient" v-model="filters.client_id">
+                      <option v-for="client in client_list" :key="client.id" :value="client.id">{{ client.name }}</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="filterStartDate">Fecha inicio</label>
+                  <input v-model="filters.start_date" type="date" id="filterStartDate" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="filterEndDate">Fecha fin</label>
+                  <input v-model="filters.end_date" type="date" id="filterEndDate" class="form-control">
+                </div>
+                <button class="btn-acordeon" @click="applyFilters">Aplicar Filtros</button>
+                <button class="btn-acordeon" @click="limpiarFiltros">Limpiar Filtros</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="container-list" v-if="report_list">
         <table class="table table-striped table-hover" v-if="report_list">
           <thead>
@@ -8,10 +67,10 @@
                   <th>Consecutivo</th>
                   <th>Fecha Actividad</th>
                   <th>Cliente</th>
-                  <th>Línea</th>
                   <th>Recibe</th>
                   <th>OM</th>
-                  <th>Tipo Equipamento</th>
+                  <th>Solped</th>
+                  <th>Orden de Compra</th>
                   <th>Nombre de equipo</th>
                   <th>Usuario</th>
                   <th>Actions</th>
@@ -22,10 +81,10 @@
               <td>{{ report.id }}</td>
               <td>{{ report.activity_date }}</td>
               <td>{{ report.client_name }}</td>
-              <td>{{ report.client_line }}</td>
               <td>{{ report.person_receive_name }}</td>
               <td>{{ report.om }}</td>
-              <td>{{ report.type_equipment_name }}</td>
+              <td>{{ report.solped }}</td>
+              <td>{{ report.buy_order }}</td>
               <td>{{ report.equipment_name }}</td>
               <td>{{ report.user_name }}</td>
               <td class="th-icons">
@@ -77,6 +136,24 @@
           </button>
         </div>
       </div>
+
+      <!-- Modal de error -->
+      <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true" data-bs-backdrop="static" ref="errorModal">
+          <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="errorModalLabel">Modal Usuario</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      {{ errorMsg }}
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  </div>
+              </div>
+          </div>
+      </div>
   </LayoutView>
 </template>
 
@@ -88,19 +165,33 @@ import axios from 'axios';
 import LayoutView from '../views/Layouts/LayoutView.vue';
 import ojo from "@/assets/icons/ojo.png";
 import pdf from "@/assets/icons/pdf.png";
+import { Modal } from 'bootstrap';
 
+const filters = ref({
+  om: '',
+  solped: '',
+  buy_order: '',
+  client_id: '',
+  start_date: '',
+  end_date: ''
+});
+
+const modalErrorInstance = ref(null);
 const user_id = parseInt(localStorage.getItem('user_id'));
 const user_type_id = localStorage.getItem('user_type_id');
 const token = localStorage.getItem('token');
 const msg = ref('');
 
 const report_list = ref([]);
+const client_list = ref([]);
 const total_paginas = ref(0);
 const total_registros = ref(0);
 
 const limit = ref(10);
 const position = ref(1);
 const state = ref(true);
+
+const errorMsg = ref('');
 
 const router = useRouter();
 
@@ -114,6 +205,7 @@ const get_reports = async () => {
                 limit: parseInt(limit.value),
                 position: position.value,
                 state: state.value,
+                filters: filters.value,
                 user_id: user_id
             },
             {
@@ -133,6 +225,8 @@ const get_reports = async () => {
         }
     } catch (error) {
         console.error('Error al cargar los datos:', error);
+        modalErrorInstance.value.show()
+        errorMsg.value = error.response.data.message;
     }
 }
 const changePage = async (newPosition) => {
@@ -174,9 +268,42 @@ const generar_pdf = async (report_id) => {
         error.value = error.response.data.message;
     }
 };
+const applyFilters = async () => {
+  if (position.value === 0){
+    position.value = 1;
+  }
+  await get_reports();
+};
+const limpiarFiltros = async () => {
+  filters.value.om = "";
+  filters.value.solped = "";
+  filters.value.buy_order = "";
+  filters.value.client_id = "";
+  filters.value.start_date = "";
+  filters.value.end_date = "";
+  position.value = 1;
+  await get_reports();
+};
+const get_clients = async () => {
+  const responseList = await axios.post(
+      `${apiUrl}/params/get_clients`, {},
+      {
+          headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`
+          }
+      }
+  );
+
+  if (responseList.status === 200) {
+      msg.value = responseList.data.message;
+      client_list.value = responseList.data.data;
+  }
+};
 
 // Código que se ejecuta al montar el componente
 onMounted(() => {
+    modalErrorInstance.value = new Modal(errorModal);
     if (!token) {
         router.push('/'); // Redirigir al login si no hay token
     }
@@ -187,12 +314,6 @@ onMounted(() => {
 
 <style scoped>
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 body,
 html {
   height: 100%;
@@ -200,12 +321,43 @@ html {
   font-family: "DM Sans", serif;
 }
 
+.accordion {
+  margin-top: 20px;
+}
+
+.filter-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  padding: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.btn-acordeon {
+  background-color: #2a475f;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 0 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 .container-list {
   width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
