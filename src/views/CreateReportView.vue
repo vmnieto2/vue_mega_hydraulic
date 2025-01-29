@@ -398,6 +398,10 @@ const onClienteChange = async () => {
 };
 const onChangeTasks = async () => {
     try {
+        if (tipo_equipo.value === 5){
+            tasks_list.value = [];
+            return
+        }
         const response = await axios.post(
             `${apiUrl}/params/get_tasks_by_equipment`, 
             { equipment: tipo_equipo.value },
