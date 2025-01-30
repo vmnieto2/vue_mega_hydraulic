@@ -126,7 +126,10 @@
                   <div class="modal-body">
                       {{ errorMsg }}
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer" v-if="token_status===401">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="logout">Cerrar</button>
+                  </div>
+                  <div class="modal-footer" v-else>
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                   </div>
               </div>
@@ -195,6 +198,7 @@ const modalInstanceExito  = ref(null);
 const modalInstancePregunta = ref(null);
 const modalErrorInstance  = ref(null);
 const modalInstanceEditar   = ref(null);
+const token_status = ref(0);
 
 const router = useRouter();
 
@@ -237,6 +241,12 @@ const get_users = async () => {
     }
   } catch (error) {
       console.error('Error al cargar los datos:', error);
+      modalErrorInstance.value.show();
+      errorMsg.value = error.response.data.message;
+      if (error.response.status === 401) {
+        token_status.value = error.response.status
+        errorMsg.value = error.response.data.detail;
+      }
   }
 }
 const changePage = async (newPosition) => {
@@ -278,7 +288,11 @@ const cambiarEstado = async () => {
   } catch (error) {
     modalErrorInstance.value.show()
     errorMsg.value = error.response.data.message;
-  }
+    if (error.response.status === 401) {
+      token_status.value = error.response.status
+      errorMsg.value = error.response.data.detail;
+    }
+}
 };
 const gestionUsuario = async () => {
   try {
@@ -304,6 +318,12 @@ const gestionUsuario = async () => {
 
   } catch (error) {
       console.error('Error al cargar los datos:', error);
+      modalErrorInstance.value.show();
+      errorMsg.value = error.response.data.message;
+      if (error.response.status === 401) {
+        token_status.value = error.response.status
+        errorMsg.value = error.response.data.detail;
+      }
   }
 };
 const modalEdit = async (param) => {
@@ -311,6 +331,12 @@ const modalEdit = async (param) => {
   usuario_id.value = param.id
   modalInstanceEditar.value.show();
 };
+// Función para manejar el cierre de sesión
+function logout() {
+  localStorage.clear();
+  router.push('/'); // Redirigir al login
+}
+
 // Código que se ejecuta al montar el componente
 onMounted(() => {
     modalInstanceExito.value = new Modal(exitoModal);

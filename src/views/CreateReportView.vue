@@ -178,6 +178,27 @@
             </div>
         </div>
 
+        <!-- Modal de error -->
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true" data-bs-backdrop="static" ref="errorModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="errorModalLabel">Modal Usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{ errorMsg }}
+                    </div>
+                    <div class="modal-footer" v-if="token_status===401">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="logout">Cerrar</button>
+                    </div>
+                    <div class="modal-footer" v-else>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </LayoutView>
 </template>
 
@@ -218,6 +239,9 @@ const modalInstance = ref(null);
 const report_id = ref('');
 const msg = ref('');
 const error = ref('');
+const modalErrorInstance = ref(null);
+const errorMsg = ref('');
+const token_status = ref(0);
 
 // Acceder al enrutador
 const router = useRouter();
@@ -275,7 +299,12 @@ const createReport = async () => {
         }
     } catch (error) {
         console.error('Error al guardar reporte:', error);
-        error.value = error.response.data.message;
+        modalErrorInstance.value.show();
+        errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
+        }
     }
 };
 const generar_pdf = async () => {
@@ -311,7 +340,12 @@ const generar_pdf = async () => {
         }
     } catch (error) {
         console.error('Error al generar pdf:', error);
-        error.value = error.response.data.message;
+        modalErrorInstance.value.show();
+        errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = "El token ha expirado.";
+        }
     }
 };
 const cargarDatos = async () => {
@@ -361,6 +395,12 @@ const cargarDatos = async () => {
 
     } catch (error) {
         console.error('Error al cargar los datos:', error);
+        modalErrorInstance.value.show();
+        errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
+        }
     }
 
 };
@@ -394,6 +434,12 @@ const onClienteChange = async () => {
 
     } catch (error) {
         console.error('Error al cargar datos dinámicos:', error);
+        modalErrorInstance.value.show();
+        errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
+        }
     }
 };
 const onChangeTasks = async () => {
@@ -420,6 +466,12 @@ const onChangeTasks = async () => {
 
     } catch (error) {
         console.error('Error al cargar datos dinámicos:', error);
+        modalErrorInstance.value.show();
+        errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
+        }
     }
 };
 const addImageInput = async () => {
@@ -447,9 +499,15 @@ const handleImageChange = async (event, index) => {
 const goListaReportes = () => {
     router.push('/reports');
 };
+// Función para manejar el cierre de sesión
+function logout() {
+  localStorage.clear();
+  router.push('/'); // Redirigir al login
+}
 // Código que se ejecuta al montar el componente
 onMounted(() => {
     modalInstance.value = new Modal(exitoModal);
+    modalErrorInstance.value = new Modal(errorModal);
     if (!token) {
         router.push('/'); // Redirigir al login si no hay token
     }

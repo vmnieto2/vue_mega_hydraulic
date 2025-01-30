@@ -59,9 +59,12 @@
                     <div class="modal-body">
                         {{ errorMsg }}
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <div class="modal-footer" v-if="token_status===401">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="logout">Cerrar</button>
                     </div>
+                    <div class="modal-footer" v-else>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  </div>
                 </div>
             </div>
         </div>
@@ -92,6 +95,7 @@ const modalErrorInstance = ref(null);
 const msg = ref('');
 const error = ref('');
 const errorMsg = ref('');
+const token_status = ref(0);
 
 const actualizarCliente = async () => {
 
@@ -123,6 +127,10 @@ const actualizarCliente = async () => {
     } catch (error) {
         modalErrorInstance.value.show()
         errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
+        }
     }
 }
 const cargarDatos = async () => {
@@ -155,8 +163,17 @@ const cargarDatos = async () => {
         console.error('Error al cargar los datos:', error);
         modalErrorInstance.value.show()
         errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
+        }
     }
 };
+// Función para manejar el cierre de sesión
+function logout() {
+  localStorage.clear();
+  router.push('/'); // Redirigir al login
+}
 
 // Código que se ejecuta al montar el componente
 onMounted(() => {

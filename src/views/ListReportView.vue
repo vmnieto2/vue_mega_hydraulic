@@ -148,7 +148,10 @@
                   <div class="modal-body">
                       {{ errorMsg }}
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer" v-if="token_status===401">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="logout">Cerrar</button>
+                  </div>
+                  <div class="modal-footer" v-else>
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                   </div>
               </div>
@@ -192,6 +195,7 @@ const position = ref(1);
 const state = ref(true);
 
 const errorMsg = ref('');
+const token_status = ref(0);
 
 const router = useRouter();
 
@@ -225,8 +229,12 @@ const get_reports = async () => {
         }
     } catch (error) {
         console.error('Error al cargar los datos:', error);
-        modalErrorInstance.value.show()
+        modalErrorInstance.value.show();
         errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
+        }
     }
 }
 const changePage = async (newPosition) => {
@@ -265,7 +273,12 @@ const generar_pdf = async (report_id) => {
         }
     } catch (error) {
         console.error('Error al generar pdf:', error);
-        error.value = error.response.data.message;
+        modalErrorInstance.value.show();
+        errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+          token_status.value = error.response.status
+          errorMsg.value = "El token ha expirado.";
+        }
     }
 };
 const applyFilters = async () => {
@@ -285,21 +298,37 @@ const limpiarFiltros = async () => {
   await get_reports();
 };
 const get_clients = async () => {
-  const responseList = await axios.post(
-      `${apiUrl}/params/get_clients`, {},
-      {
-          headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`
-          }
-      }
-  );
+  try {
+    const responseList = await axios.post(
+        `${apiUrl}/params/get_clients`, {},
+        {
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
 
-  if (responseList.status === 200) {
-      msg.value = responseList.data.message;
-      client_list.value = responseList.data.data;
+    if (responseList.status === 200) {
+        msg.value = responseList.data.message;
+        client_list.value = responseList.data.data;
+    }
+
+  } catch (error) {
+      console.error('Error al generar pdf:', error);
+      modalErrorInstance.value.show();
+      errorMsg.value = error.response.data.message;
+      if (error.response.status === 401) {
+        token_status.value = error.response.status
+        errorMsg.value = error.response.data.detail;
+      }
   }
 };
+// Función para manejar el cierre de sesión
+function logout() {
+  localStorage.clear();
+  router.push('/'); // Redirigir al login
+}
 
 // Código que se ejecuta al montar el componente
 onMounted(() => {

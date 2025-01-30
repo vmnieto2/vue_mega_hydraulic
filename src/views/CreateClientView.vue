@@ -70,7 +70,10 @@
                     <div class="modal-body">
                         {{ errorMsg }}
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" v-if="token_status===401">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="logout">Cerrar</button>
+                    </div>
+                    <div class="modal-footer" v-else>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
@@ -82,6 +85,7 @@
 <script setup>
 import apiUrl from "../../config.js";
 import { ref, onMounted } from 'vue';
+import { useRouter } from "vue-router";
 import LayoutView from '../views/Layouts/LayoutView.vue';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
@@ -99,6 +103,10 @@ const modalErrorInstance = ref(null);
 const msg = ref('');
 const error = ref('');
 const errorMsg = ref('');
+const token_status = ref(0);
+
+// Acceder al enrutador
+const router = useRouter();
 
 
 const crearCliente = async () => {
@@ -130,6 +138,10 @@ const crearCliente = async () => {
     } catch (error) {
         modalErrorInstance.value.show()
         errorMsg.value = error.response.data.message;
+        if (error.response.status === 401) {
+            token_status.value = error.response.status
+            errorMsg.value = error.response.data.detail;
+        }
     }
 }
 
@@ -143,6 +155,11 @@ const agregarParam = (nuevaLista, param) => {
 const eliminarParam = (nuevaLista, index) => {
     nuevaLista.splice(index, 1);
 };
+// Función para manejar el cierre de sesión
+function logout() {
+  localStorage.clear();
+  router.push('/'); // Redirigir al login
+}
 
 // Código que se ejecuta al montar el componente
 onMounted(() => {
