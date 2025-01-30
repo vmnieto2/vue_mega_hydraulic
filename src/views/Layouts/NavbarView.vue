@@ -7,7 +7,7 @@
     </header>
 
     <nav>
-      <router-link :to="`/dashboard`">Menú Principal</router-link>
+      <router-link :to="{ name: 'dashboard'}">Menú Principal</router-link>
       <router-link :to="{ name: 'profile/edit/', params: { id: usuario } }">Editar Perfil</router-link>
       <router-link :to="{ name: 'profile/change_password/', params: { id: usuario } }">Cambiar Contraseña</router-link>
       <a href="#" @click="logout">Salir</a>

@@ -153,10 +153,10 @@
 
             <hr>
             
-            <button type="submit">Crear</button>
-            <div v-if="error" class="alert alert-danger mt-3" >
-                {{ error }}
-            </div>
+            <button type="submit" class="btn btn-primary mt-3" :disabled="isLoading">
+                <span v-if="isLoading" class="spinner-border spinner-border-sm"></span>
+                {{ isLoading ? 'Guardando...' : 'Crear' }}
+            </button>
         </form>
 
         <!-- Modal de éxito -->
@@ -242,6 +242,7 @@ const error = ref('');
 const modalErrorInstance = ref(null);
 const errorMsg = ref('');
 const token_status = ref(0);
+const isLoading = ref(false);
 
 // Acceder al enrutador
 const router = useRouter();
@@ -251,6 +252,8 @@ const createReport = async () => {
         if (!token) {
             router.push('/'); // Redirigir al login si no hay token
         }
+
+        isLoading.value = true; // Activar la espera
 
         const [year, month, day] = fecha_actividad.value.split("-");
 
@@ -305,6 +308,8 @@ const createReport = async () => {
           token_status.value = error.response.status
           errorMsg.value = error.response.data.detail;
         }
+    } finally {
+        isLoading.value = false; // Desactivar la espera
     }
 };
 const generar_pdf = async () => {

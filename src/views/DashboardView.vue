@@ -102,4 +102,20 @@ html {
     font-weight: bold;
     height: 30px;
 }
+
+/* Media Query para pantallas pequeñas */
+@media (max-width: 768px) {
+  .card-container {
+    flex-direction: column; /* Las cards se organizan una encima de otra en pantallas pequeñas */
+    align-items: center; /* Centra las cards */
+  }
+
+  .card {
+    max-width: 100%; /* Las cards toman el 100% del ancho disponible en pantallas pequeñas */
+  }
+
+  .card .card-header img {
+    width: 4rem; /* Reducimos el tamaño de la imagen en pantallas pequeñas */
+  }
+}
 </style>
