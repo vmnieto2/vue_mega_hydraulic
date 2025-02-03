@@ -90,6 +90,9 @@
               <td class="th-icons">
                 <router-link :to="`/report/edit/${report.id}`" ><img :src="ojo" alt="eye icon"></router-link>
                 <a href="#"><img :src="pdf" alt="pdf icon" @click="generar_pdf(report.id)"></a>
+                <td v-if="user_type_id == 1">
+                  <img class="icon_deactivate" :src="desactivar" alt="desactivar icon" @click="modalConfirm(report.id)">
+                </td>
               </td>
               </tr>
           </tbody>
@@ -137,6 +140,43 @@
         </div>
       </div>
 
+      <!-- Modal de éxito -->
+      <div class="modal fade" id="exitoModal" tabindex="-1" aria-labelledby="exitoModalLabel" aria-hidden="true" data-bs-backdrop="static" ref="exitoModal">
+          <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exitoModalLabel">Módulo Usuario</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  {{ msg }}
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cerrar</button>
+              </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Modal de pregunta -->
+      <div class="modal fade" id="preguntaModal" tabindex="-1" aria-labelledby="preguntaModalLabel" aria-hidden="true" data-bs-backdrop="static" ref="preguntaModal">
+          <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="preguntaModalLabel">Question</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  {{ pregunta }} {{ report_id }}?
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-success" @click="cambiarEstado">Yes</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+              </div>
+          </div>
+      </div>
+
       <!-- Modal de error -->
       <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true" data-bs-backdrop="static" ref="errorModal">
           <div class="modal-dialog modal-dialog-centered">
@@ -168,6 +208,7 @@ import axios from 'axios';
 import LayoutView from '../views/Layouts/LayoutView.vue';
 import ojo from "@/assets/icons/ojo.png";
 import pdf from "@/assets/icons/pdf.png";
+import desactivar from "@/assets/icons/desactivar.png";
 import { Modal } from 'bootstrap';
 
 const filters = ref({
@@ -179,12 +220,15 @@ const filters = ref({
   end_date: ''
 });
 
+const modalInstanceExito  = ref(null);
 const modalErrorInstance = ref(null);
+const modalInstancePregunta = ref(null);
 const user_id = parseInt(localStorage.getItem('user_id'));
 const user_type_id = localStorage.getItem('user_type_id');
 const token = localStorage.getItem('token');
 const msg = ref('');
 
+const report_id = ref(0);
 const report_list = ref([]);
 const client_list = ref([]);
 const total_paginas = ref(0);
@@ -196,6 +240,7 @@ const state = ref(true);
 
 const errorMsg = ref('');
 const token_status = ref(0);
+const pregunta = ref('');
 
 const router = useRouter();
 
@@ -221,7 +266,6 @@ const get_reports = async () => {
         );
 
         if (response.status === 200) {
-            msg.value = response.data.message;
             report_list.value = response.data.data.reportes;
             total_paginas.value = response.data.data.total_pag;
             total_registros.value = response.data.data.total_registros;
@@ -328,11 +372,48 @@ const get_clients = async () => {
 function logout() {
   localStorage.clear();
   router.push('/'); // Redirigir al login
+};
+const modalConfirm = async (id_reporte) => {
+  pregunta.value = "¿Seguro desea eliminar el reporte: "
+  modalInstancePregunta.value.show();
+  report_id.value = id_reporte;
+};
+const cambiarEstado = async () => {
+  try {
+      const response = await axios.post(
+          `${apiUrl}/reports/change_status_report`, 
+          {
+            report_id: report_id.value
+          },
+          {
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`
+            }
+          }
+      );
+      modalInstancePregunta.value.hide();
+      if (response.status === 200) {
+          msg.value = response.data.message;
+          modalInstanceExito.value.show();
+          await get_reports();
+      }
+  } catch (error) {
+      console.error('Error al cargar los datos:', error);
+      modalErrorInstance.value.show();
+      errorMsg.value = error.response.data.message;
+      if (error.response.status === 401) {
+        token_status.value = error.response.status
+        errorMsg.value = error.response.data.detail;
+      }
+  }
 }
 
 // Código que se ejecuta al montar el componente
 onMounted(() => {
+    modalInstanceExito.value = new Modal(exitoModal);
     modalErrorInstance.value = new Modal(errorModal);
+    modalInstancePregunta.value = new Modal(preguntaModal);
     if (!token) {
         router.push('/'); // Redirigir al login si no hay token
     }
@@ -398,6 +479,10 @@ html {
   display: flex;
   justify-content: space-around;
   align-items: center;
+}
+
+.icon_deactivate{
+  cursor: pointer;
 }
 
 .pagination {
