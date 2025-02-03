@@ -191,6 +191,9 @@
                   <div class="modal-footer" v-if="token_status===401">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="logout">Cerrar</button>
                   </div>
+                  <div class="modal-footer" v-else-if="token_status===403">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="redirigir_dashboard">Cerrar</button>
+                  </div>
                   <div class="modal-footer" v-else>
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                   </div>
@@ -278,6 +281,9 @@ const get_reports = async () => {
         if (error.response.status === 401) {
           token_status.value = error.response.status
           errorMsg.value = error.response.data.detail;
+        }else if (error.response.status === 403) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
         }
     }
 }
@@ -322,6 +328,9 @@ const generar_pdf = async (report_id) => {
         if (error.response.status === 401) {
           token_status.value = error.response.status
           errorMsg.value = "El token ha expirado.";
+        } else if (error.response.status === 403) {
+          token_status.value = error.response.status
+          errorMsg.value = error.response.data.detail;
         }
     }
 };
@@ -365,6 +374,9 @@ const get_clients = async () => {
       if (error.response.status === 401) {
         token_status.value = error.response.status
         errorMsg.value = error.response.data.detail;
+      } else if (error.response.status === 403) {
+        token_status.value = error.response.status
+        errorMsg.value = error.response.data.detail;
       }
   }
 };
@@ -373,6 +385,9 @@ function logout() {
   localStorage.clear();
   router.push('/'); // Redirigir al login
 };
+function redirigir_dashboard() {
+  router.push('/dashboard'); // Redirigir al dashboard
+}
 const modalConfirm = async (id_reporte) => {
   pregunta.value = "¿Seguro desea eliminar el reporte: "
   modalInstancePregunta.value.show();
@@ -403,6 +418,9 @@ const cambiarEstado = async () => {
       modalErrorInstance.value.show();
       errorMsg.value = error.response.data.message;
       if (error.response.status === 401) {
+        token_status.value = error.response.status
+        errorMsg.value = error.response.data.detail;
+      } else if (error.response.status === 403) {
         token_status.value = error.response.status
         errorMsg.value = error.response.data.detail;
       }
